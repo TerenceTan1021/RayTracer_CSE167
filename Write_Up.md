@@ -1,14 +1,16 @@
-###RayTracer Write Up
+# RayTracer Write Up
 
 RayTracer.cpp
 
 
 
-#Task 2
+### Task 2
 ---
-*src/geometries/GeomSphere.cpp*
+Located in: *src/geometries/GeomSphere.cpp*
 
-Function: vector<Intersection> GeomSphere::ntersect(Ray &ray)
+`Function: vector<Intersection> GeomSphere::intersect(Ray &ray)`
+
+**Math Behind it**
 
 variables:
 - c: sphere center
@@ -19,24 +21,26 @@ variables:
 
 this funtion follow the sphere intersection quadratic equation for finding the sphere intersect:
 
-> ||r_o + tr_d - c||^2 = R^2
+> ||p_0 + td - c||^2 = r^2
 
-to find t, we need to find where the point lies on the sphere, the point only lies on the sphere if and only if: (q - c) * (q -c) = r^2
+to find t, we need to find where the point lies on the sphere, the point only lies on the sphere if and only if: 
+
+> (q - c) * (q -c) = r^2
 
 subsituting the formulas gives us:
 
-`(p_0 + td - c) * (p_0 + td - c) = r^2`
+> (p_0 + td - c) * (p_0 + td - c) = r^2
 
 Expand:
 
-`|d|^2t^2 + 2d * (p_0 - c)t + |p_0 = c|^2 - r^2 = 0`, 
-where |d|^2 = 1, because of normalization
+>|d|^2t^2 + 2d * (p_0 - c)t + |p_0 = c|^2 - r^2 = 0 , 
+where ==|d|^2 = 1, because of normalization==
 
-`t^2 + 2d * (p_0 - c)t + |p_0 = c|^2 - r^2 = 0`
+> t^2 + 2d * (p_0 - c)t + |p_0 = c|^2 - r^2 = 0
 
 which gives us:
 
-`t = -d * (p_0 - c) +- sqrt((d * (p_0 - c))^2 - |p_0 - c|^2 + r^2)`
+> t = -d * (p_0 - c) +- sqrt((d * (p_0 - c))^2 - |p_0 - c|^2 + r^2)
 
 where if the expression within the sqrt is
   - negative: there is no intersection
@@ -45,11 +49,11 @@ where if the expression within the sqrt is
 
 after finding the intersection, we would then find the point posiiton and the Normal:
 
-Point position: q = p_0 + td
-Normal: normalize(q - c)
+> Point position: q = p_0 + td
+> Normal: normalize(q - c)
 
 Image produced after Implemetation:
-![image](images/Task2.1.png)
+<img src="images/Task2.1.png" alt="image" width="200"/>
 
 
 
