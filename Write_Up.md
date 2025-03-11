@@ -45,5 +45,7 @@ Point position: q = p_0 + td
 Normal: normalize(q - c)
 
 Image produced after Implemetation:
-![image](image/Task2.1.png)
+![image](images/Task2.1.png)
+
+
 
