@@ -1,11 +1,56 @@
 # RayTracer Write Up
 
-RayTracer.cpp
+### Before Implementation
+---
+The Image produce when executing the file, should produce a blue screen before any implementations
+
+<img src="images/before.png" alt="image" width="300"/>
+
+### Task 1 & Task 3
+---
+Located in: *src/scenes/RayTracer.cpp*
+
+`Ray RayTracer::ray_thru_pixel(int i, int j)`
+
+**Math Behind it**
+
+The pixel (i, j) can be defined with
+
+> (2 * ((i + 0.5) / width) - 1, 1 - 2 * ((j + 0.5)/ height))
+
+to get a random point, we can replace 0.5 with any value between [0,1]
 
 
+`x,y = [0,1]`
+
+>> (2 * ((i + x) / width) - 1, 1 - 2 * ((j + x)/ height))
+
+This is implemented for Task 3, this allows us to change the first args `<int: samples_per_pixel>`
+to a higher value to minimize noise:
+
+<img src="images/Task3.png" alt="image" width="300"/>
+
+ to which we can define:
+
+> alpha = 2 * ((i + 0.5) / width) - 1
+>
+> beta = 1 - 2 * ((j + 0.5)/ height)
+
+calculating this, allows us to use these variables to calculate the ray direction with the formula
+
+> normalize(alpha *  a * (tan(fovy/2) * u) + beta * (tan(fovy/2) * v) - w);
+
+where:
+- a is the aspect/(width/height)
+- u,v,w are vec3 of the Camera Matrix
+
+After implementation yields:
+
+<img src="images/Task1.png" alt="image" width="300"/>
 
 ### Task 2
 ---
+
 Located in: *src/geometries/GeomSphere.cpp*
 
 `Function: vector<Intersection> GeomSphere::intersect(Ray &ray)`
