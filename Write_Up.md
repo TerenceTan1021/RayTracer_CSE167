@@ -50,10 +50,12 @@ where if the expression within the sqrt is
 after finding the intersection, we would then find the point posiiton and the Normal:
 
 > Point position: q = p_0 + td
+>
 > Normal: normalize(q - c)
 
 Image produced after Implemetation:
-<img src="images/Task2.1.png" alt="image" width="200"/>
+
+<img src="images/Task2.1.png" alt="image" width="300"/>
 
 
 
