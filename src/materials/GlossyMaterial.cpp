@@ -31,10 +31,11 @@ Ray GlossyMaterial::sample_ray_and_update_radiance(Ray &ray, Intersection &inter
         float t = linearRand(0.0f, 1.0f);
 
         // TODO: Update u, v based on Equation (8) in handout
-        float u = 0.0f;
-        float v = 0.0f;
+        float u = 2.0f * pi<float>() * s;
+        float v = sqrt(1.0f - t);
 
-        vec3 hemisphere_sample = vec3(0.0f);  // TODO: Update value to cosine-weighted sampled direction
+        //cosine weighted hemisphere sampling, d
+        vec3 hemisphere_sample = vec3(v * cos(u), sqrt(t), v * sin(u));  // TODO: Update value to cosine-weighted sampled direction
 
         // The direction we sampled above is in local co-ordinate frame
         // we need to align it with the surface normal
@@ -46,7 +47,8 @@ Ray GlossyMaterial::sample_ray_and_update_radiance(Ray &ray, Intersection &inter
          * Note:
          * - C_diffuse = `this->diffuse`
          */
-        vec3 W_diffuse = vec3(0.0f);  // TODO: Calculate the radiance for current bounce
+
+        vec3 W_diffuse = this->diffuse * max(dot(normal, new_dir), 0.0f);  // TODO: Calculate the radiance for current bounce
 
         // update radiance
         ray.W_wip = ray.W_wip * W_diffuse;
@@ -67,7 +69,8 @@ Ray GlossyMaterial::sample_ray_and_update_radiance(Ray &ray, Intersection &inter
      * TODO: Task 6.2
      * Calculate the perfect mirror reflection direction
      */
-    vec3 reflection_dir = vec3(0.0f);  // TODO: Update with reflection direction
+
+    vec3 reflection_dir = ray.dir - 2.0f * dot(normal, ray.dir) * normal;  // TODO: Update with reflection direction
 
     // Step 2: Calculate radiance
     /**
@@ -75,7 +78,7 @@ Ray GlossyMaterial::sample_ray_and_update_radiance(Ray &ray, Intersection &inter
      * Note:
      * - C_specular = `this->specular`
      */
-    vec3 W_specular = vec3(0.0f);  // TODO: Calculate the radiance for current bounce
+    vec3 W_specular = this->specular;  // TODO: Calculate the radiance for current bounce
 
     // update radiance
     ray.W_wip = ray.W_wip * W_specular;
@@ -117,15 +120,16 @@ glm::vec3 GlossyMaterial::get_direct_lighting(Intersection &intersection, Scene 
          * - Surface normal at point of intersection is stored in `intersection.normal`
          */
         Ray shadow_ray;
-        shadow_ray.p0 = vec3(0.0f);   // TODO: Update ray start position here
-        shadow_ray.dir = vec3(0.0f);  // TODO: Update ray direction here
+
+        shadow_ray.p0 = intersection.point + 0.001f * intersection.normal;
+        shadow_ray.dir = normalize(light_pos - intersection.point);
 
         // check if shadow ray intersects any model
         for (unsigned int idx = 0; idx < scene.models.size(); idx++)
             scene.models[idx]->intersect(shadow_ray);
 
         // get closest intersection
-        Intersection closest_intersection;
+        Intersection closest_intersection = {};
         closest_intersection.t = std::numeric_limits<float>::max();
         for (unsigned int idx = 0; idx < shadow_ray.intersections.size(); idx++) {
             if (shadow_ray.intersections[idx].t < closest_intersection.t)
@@ -147,7 +151,8 @@ glm::vec3 GlossyMaterial::get_direct_lighting(Intersection &intersection, Scene 
              * - This `if` condition block takes care of `visibility_of_light` part in the equation
              *   So here you just need to calculate contribution of light like we did in HW3 for diffuse part
              */
-            vec3 direct_light = vec3(0.0f);  // TODO: Update direct light constribution of light source
+            // TODO: Update direct light constribution of light source
+            vec3 direct_light = light_emission * max(dot(intersection.normal, shadow_ray.dir), 0.0f);
 
             // attenuation factor for light source based on distance
             float attenuation_factor = scene.light_sources[idx]->material->get_light_attenuation_factor(closest_intersection.t);

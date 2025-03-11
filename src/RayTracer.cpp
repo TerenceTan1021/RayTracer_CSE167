@@ -66,29 +66,26 @@ Ray RayTracer::ray_thru_pixel(int i, int j) {
      */
 
     //RayTracing Lecture 1:17:40
-    float x = glm::linearRand(0.0f, 1.0f);
-    float y = glm::linearRand(0.0f, 1.0f);
+    float x = linearRand(0.0f, 1.0f);
+    float y = linearRand(0.0f, 1.0f);
 
     /**
      * TODO: Task 1.1
      * calculate and assign direction to ray which is passoing
      * through current pixel (i, j)
      */
-    float alpha1 = (i + x);
-    float beta1 = (j + y);
-    
     //width, height, and fovy from Camera.h
-    float alpha = 2.0f * (alpha1 / camera.width) - 1.0f;
-    float beta = 1.0f  - 2.0f * (beta1 / camera.height);
+    float alpha = 2.0f * ((i + x)/ camera.width) - 1.0f;
+    float beta = 1.0f - 2.0f * ((j + y)/ camera.height);
 
     vec3 u(camera.cameraMatrix[0]);
     vec3 v(camera.cameraMatrix[1]);
     vec3 w(camera.cameraMatrix[2]);
 
-    float a = (camera.width / camera.height);
-    float scale = glm::tan(camera.fovy * 0.5f);
+    float a = (camera.aspect);
+    float scale = tan(camera.fovy / 2.0f);
 
-    ray.dir = glm::normalize((alpha * (a * scale * u)) + (beta * scale * v) - w);  // TODO: Implement this
+    ray.dir = normalize(alpha *  a * (scale * u) + beta * (scale * v) - w);  // TODO: Implement this
 
     return ray;
 }
@@ -207,7 +204,7 @@ void RayTracer::draw() {
          * TODO: After Completing Task 3
          * set `active_samples_per_pixel = 1`
          */
-        active_samples_per_pixel = samples_per_pixel;  // TODO: Hardcode this value to 1 once Task 3 is complete
+        active_samples_per_pixel = 1;  // TODO: Hardcode this value to 1 once Task 3 is complete
         active_max_bounces = 1;
     } else {
         active_samples_per_pixel = samples_per_pixel;

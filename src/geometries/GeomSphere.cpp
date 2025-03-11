@@ -37,7 +37,6 @@ std::vector<Intersection> GeomSphere::intersect(Ray &ray) {
      * - Only add intersections that are in front of the camera, i.e.,
      *   where t > 0.
      */
-    
 
     //Sphere center and radius
     vec3 c = this->center;
@@ -52,9 +51,9 @@ std::vector<Intersection> GeomSphere::intersect(Ray &ray) {
     float tempA = dot(-d, pc);
 
     //inside the sqrt
-    float tempB = dot(d, pc) * dot(d, pc);
-    float tempC = dot(pc, pc);
-    float tempD = (r * r);
+    float tempB = dot(d, pc) * dot(d, pc);      //(d * (p_0 - c))^2
+    float tempC = dot(pc, pc);                  //(p_0 - c)^2
+    float tempD = pow(r, 2);                    //r^2
 
     float section = tempB - tempC + tempD;
 
@@ -66,12 +65,11 @@ std::vector<Intersection> GeomSphere::intersect(Ray &ray) {
     //if the expression in sqrt is a zero --> tangent
     else if(section == 0.0f){
         float t = tempA;
-        if(t > 0){
+        if(t > 0.0f){
             vec3 q = p_0 + (t * d);
             vec3 n = normalize(q - c);
             intersections.push_back({t, q, n, this, nullptr});
         }
-
     }
      /*
     if the expression in sqrt is positive --> two intersections
@@ -90,7 +88,7 @@ std::vector<Intersection> GeomSphere::intersect(Ray &ray) {
             vec3 n = normalize(q - c);
             intersections.push_back({t1, q, n, this, nullptr});
         }
-        else if((t2 < t1) && (t2 > 0.0f)){
+        if((t2 < t1) && (t2 > 0.0f)){
             vec3 q = p_0 + (t2 * d);
             vec3 n = normalize(q - c);
             intersections.push_back({t2, q, n, this, nullptr});

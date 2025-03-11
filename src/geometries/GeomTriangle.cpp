@@ -49,7 +49,7 @@ std::vector<Intersection> GeomTriangle::intersect(Ray &ray) {
      * - Only add intersections that are in front of the camera, i.e.,
      *   where t > 0.
      */
-    /*
+    //ray dir and Source
      vec3 d = ray.dir;
      vec3 p_0  = ray.p0;
 
@@ -76,21 +76,15 @@ std::vector<Intersection> GeomTriangle::intersect(Ray &ray) {
     float coef3 = D.z;
     float t = D.w;
 
-    //check if all coef equals to 1
-    if(coef1 + coef2 + coef3 != 1.0f){
-        return intersections;
-    }
     vec3 n1 = normals[0];
     vec3 n2 = normals[1];
     vec3 n3 = normals[2];
 
     if(coef1 >= 0.0f && coef2 >= 0.0f && coef3 >= 0.0f && t >= 0.0f){
-        vec3 point = (p1 * coef1) + (p2 * coef2) + (p3 * coef3);
-        vec3 normal = (coef1 * n1) + (coef2 * n2) + (coef3 * n3);
-        intersections.push_back({t, point, normal, this, nullptr});
+        vec3 p = (p1 * coef1) + (p2 * coef2) + (p3 * coef3);
+        vec3 n = normalize((coef1 * n1) + (coef2 * n2) + (coef3 * n3));
+        intersections.push_back({t, p, n, this, nullptr});
     }
-        */
-
     /**
      * TODO: Update `intersections`
      */
