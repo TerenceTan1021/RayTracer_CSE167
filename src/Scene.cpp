@@ -2,7 +2,10 @@
 #include <stack>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtc/random.hpp>
 
+
+#include <glm/gtc/random.hpp>
 #include "ModelBase.h"
 #include "Ray.h"
 #include "Scene.h"
@@ -62,60 +65,85 @@ void Scene::intersect(Ray &ray) const {
      * the model. If it does, we will update the ray with the intersection
      * details.
      */
+    //Russian Roulette
 
-    ray.intersections.clear();
+    //Russian variables
+    //lamda will be the probabily that the ray will terminate
+    float lambda = 0.7f;
+    //probability of non-termination
+    float termination_no = 1.0f - lambda;
 
-    for (unsigned int idx = 0; idx < models.size(); idx++) {
-        // ray is updated with just intersection details
-        models[idx]->intersect(ray);
-    }
+    float factor = 1.0f;
 
-    // Select the closest intersection
-    // This section assumes that ray intesections behind the camera are
-    // already filtered out by the `model->intersect()` function
-    Intersection intersection;
-    intersection.t = std::numeric_limits<float>::max();
-    for (unsigned int idx = 0; idx < ray.intersections.size(); idx++) {
-        if (ray.intersections[idx].t < intersection.t)
-            intersection = ray.intersections[idx];
-    }
+    while(true){
+        ray.intersections.clear();
 
-    // update color based on intersection
-    if (ray.intersections.size() > 0) {
-        // if normal shading is on
-        if (this->shading_mode == ShadingMode::NORMAL) {
-            // just return normal as color
-            ray.color = RGB_to_Linear(0.4f * intersection.normal + 0.6f);
-            ray.isWip = false;
+        for (unsigned int idx = 0; idx < models.size(); idx++) {
+            // ray is updated with just intersection details
+            models[idx]->intersect(ray);
+        }
+
+        // Select the closest intersection
+        // This section assumes that ray intesections behind the camera are
+        // already filtered out by the `model->intersect()` function
+        Intersection intersection;
+        intersection.t = std::numeric_limits<float>::max();
+        for (unsigned int idx = 0; idx < ray.intersections.size(); idx++) {
+            if (ray.intersections[idx].t < intersection.t)
+                intersection = ray.intersections[idx];
+        }
+        if(ray.intersections.size() == 0){
+            // if no intersection, update color with sky color`
+            ray.W_wip = ray.W_wip * this->get_sky_color(ray);  // sky color
+            ray.isWip = false;                                 // no further processing
+            ray.color = ray.W_wip;
             return /*ray*/;
         }
 
-        if (intersection.model->is_light_source()) {
-            if (ray.is_diffuse_bounce)
-                // ignore to avoid double counting
-                ray.color = vec3(0.0f);
-            else
-                ray.color = ray.W_wip * intersection.model->material->emission;
+        // update color based on intersection
+        if (ray.intersections.size() > 0) {
+            // if normal shading is on
+            if (this->shading_mode == ShadingMode::NORMAL) {
+                // just return normal as color
+                ray.color = RGB_to_Linear(0.4f * intersection.normal + 0.6f);
+                ray.isWip = false;
+                return /*ray*/;
+            }
 
-            ray.isWip = false;  // no further processing
-            return /*ray*/;
+            // Handle light source intersections
+            if (intersection.model->is_light_source()) {
+                if (ray.is_diffuse_bounce) {
+                    ray.color = vec3(0.0f);  // Ignore to avoid double counting
+                } else {
+                    ray.color = ray.W_wip * intersection.model->material->emission;
+                }
+                ray.isWip = false;  // no further processing
+                return /*ray*/;
+            }
+
+            // Russian Roulette Termination
+            // what random number is choosen for termination will be compared with lambda
+            float termination = linearRand(0.0f, 1.0f);
+
+            if (termination < lambda) {
+                factor *= lambda;
+                ray.color += ray.W_wip * (intersection.model->material->emission +
+                                          intersection.model->material->color_of_last_bounce(ray, intersection, *this));
+                ray.color = (1.0f / factor) * ray.color;
+                ray.isWip = false;
+                return;
+            }
+            else{
+                factor *= 1.0f - lambda;
+                 // update the current color
+                ray.color += intersection.model->material->emission * ray.W_wip;
+
+                // This function will give out next ray and
+                // update wip color params as well
+                ray = intersection.model->material->sample_ray_and_update_radiance(ray, intersection);
+            }
         }
-
-        // update color for nth last bounce
-        ray.color = intersection.model->material->color_of_last_bounce(ray, intersection, *this);
-
-        // This function will give out next ray and
-        // update wip color params as well
-        ray = intersection.model->material->sample_ray_and_update_radiance(ray, intersection);
-
-        return /*ray*/;
     }
-
-    // if no intersection, update color with sky color`
-    ray.W_wip = ray.W_wip * this->get_sky_color(ray);  // sky color
-    ray.isWip = false;                                 // no further processing
-    ray.color = ray.W_wip;
-    return /*ray*/;
 }
 
 glm::vec3 Scene::get_sky_color(Ray &ray) const {

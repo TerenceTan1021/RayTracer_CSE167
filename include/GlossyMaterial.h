@@ -25,6 +25,10 @@ class GlossyMaterial : public MaterialBase {
     glm::vec3 get_direct_lighting(Intersection &intersection, Scene const &scene);
 
     glm::vec3 color_of_last_bounce(Ray &ray, Intersection &intersection, Scene const &scene) override;
+    
+
+
+    
 };
 
 #endif

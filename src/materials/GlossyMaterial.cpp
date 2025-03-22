@@ -78,7 +78,9 @@ Ray GlossyMaterial::sample_ray_and_update_radiance(Ray &ray, Intersection &inter
      * Note:
      * - C_specular = `this->specular`
      */
+    
     vec3 W_specular = this->specular;  // TODO: Calculate the radiance for current bounce
+
 
     // update radiance
     ray.W_wip = ray.W_wip * W_specular;

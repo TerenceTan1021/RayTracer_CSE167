@@ -48,7 +48,7 @@ After implementation yields:
 
 <img src="images/Task1.png" alt="image" width="300"/>
 
-### Task 2
+### Task 2.1 & 2.2
 ---
 
 Located in: *src/geometries/GeomSphere.cpp*
